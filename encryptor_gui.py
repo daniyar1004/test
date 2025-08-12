@@ -26,8 +26,7 @@ def encrypt_file(in_path, out_path, password, progress_callback=None):
             chunk = fin.read(CHUNK_SIZE)
             if not chunk:
                 break
-            enc_chunk = xor_encrypt(chunk, password)
-            fout.write(enc_chunk)
+            fout.write(xor_encrypt(chunk, password))
             processed += len(chunk)
             if progress_callback:
                 progress_callback(processed, total)
@@ -40,8 +39,7 @@ def decrypt_file(in_path, out_path, password, progress_callback=None):
             chunk = fin.read(CHUNK_SIZE)
             if not chunk:
                 break
-            dec_chunk = xor_encrypt(chunk, password)
-            fout.write(dec_chunk)
+            fout.write(xor_encrypt(chunk, password))
             processed += len(chunk)
             if progress_callback:
                 progress_callback(processed, total)
@@ -121,13 +119,12 @@ class EncryptorApp(tk.Tk):
         if not password:
             messagebox.showwarning('Ошибка', 'Введите пароль')
             return
-        out_path = filedialog.asksaveasfilename(defaultextension='.encx')
-        if not out_path:
-            return
+
+        out_path = self.file_path + '.encx'
         self.log_msg('Начало шифрования...')
         encrypt_file(self.file_path, out_path, password, progress_callback=self.set_progress)
         self.log_msg(f'Файл записан: {out_path}')
-        messagebox.showinfo('Готово', 'Шифрование завершено')
+        messagebox.showinfo('Готово', f'Файл зашифрован:\n{out_path}')
 
     def decrypt_action(self):
         if not self.file_path:
@@ -137,13 +134,16 @@ class EncryptorApp(tk.Tk):
         if not password:
             messagebox.showwarning('Ошибка', 'Введите пароль')
             return
-        out_path = filedialog.asksaveasfilename()
-        if not out_path:
-            return
+
+        if self.file_path.endswith('.encx'):
+            out_path = self.file_path[:-5]
+        else:
+            out_path = self.file_path + '_dec'
+
         self.log_msg('Начало расшифровки...')
         decrypt_file(self.file_path, out_path, password, progress_callback=self.set_progress)
         self.log_msg(f'Файл расшифрован: {out_path}')
-        messagebox.showinfo('Готово', 'Расшифровка завершена')
+        messagebox.showinfo('Готово', f'Файл расшифрован:\n{out_path}')
 
 if __name__ == '__main__':
     app = EncryptorApp()
